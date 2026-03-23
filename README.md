@@ -24,93 +24,64 @@ Test the C Program for the desired output.
 # PROGRAM:
 
 ## C Program to create new process using Linux API system calls fork() and getpid() , getppid() and to print process ID and parent Process ID using Linux API system calls
-#include<stdio.h>
-#include<stdlib.h>
-#include<sys/types.h> 
-#include<sys/stat.h> 
-#include<string.h> 
-#include<fcntl.h> 
-#include<unistd.h>
-#include<sys/wait.h>
-void server(int,int); 
-void client(int,int); 
-int main() 
-{ 
-int p1[2],p2[2],pid, *waits; 
-pipe(p1); 
-pipe(p2); 
-pid=fork(); 
-if(pid==0) { 
-close(p1[1]); 
-close(p2[0]); 
-server(p1[0],p2[1]); return 0;
- } 
-close(p1[0]); 
-close(p2[1]); 
-client(p1[1],p2[0]); 
-wait(waits); 
-return 0; 
-} 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-void server(int rfd,int wfd) 
-{ 
-int i,j,n; 
-char fname[2000]; 
-char buff[2000];
-n=read(rfd,fname,2000);
-fname[n]='\0';
-int fd=open(fname,O_RDONLY);
-sleep(10); 
-if(fd<0) 
-write(wfd,"can't open",9); 
-else 
-n=read(fd,buff,2000); 
-write(wfd,buff,n); 
-}
-void client(int wfd,int rfd) {
-int i,j,n; char fname[2000];
-char buff[2000];
-printf("ENTER THE FILE NAME :");
-scanf("%s",fname);
-printf("CLIENT SENDING THE REQUEST .... PLEASE WAIT\n");
-sleep(10);
-write(wfd,fname,2000);
-n=read(rfd,buff,2000);
-buff[n]='\0';
-printf("THE RESULTS OF CLIENTS ARE ...... \n"); write(1,buff,n);
+int main() {
+    int pid = fork();
+
+    if (pid == 0) { 
+        printf("I am child, my PID is %d\n", getpid()); 
+        printf("My parent PID is: %d\n", getppid()); 
+        sleep(2);  // Keep child alive for verification
+    } else { 
+        printf("I am parent, my PID is %d\n", getpid()); 
+        wait(NULL); 
+    }
 }
 
 
 ##OUTPUT
 
-![WhatsApp Image 2026-03-20 at 10 07 01 AM](https://github.com/user-attachments/assets/141b9bb9-fff2-4e40-a6b9-fdae18859ef1)
-
-
-
+![WhatsApp Image 2026-03-23 at 10 04 48 AM](https://github.com/user-attachments/assets/a3fca4e8-0af8-406e-8553-361604def9b0)
 
 
 
 
 ## C Program to execute Linux system commands using Linux API system calls exec() , exit() , wait() family
 
-
-#include <unistd.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-int main(){
-int res = mkfifo("/tmp/my_fifo", 0777);
-if (res == 0) printf("FIFO created\n");
-exit(EXIT_SUCCESS);
+#include <unistd.h>
+#include <sys/wait.h>
+#include <stdlib.h>
+
+int main()
+{
+    pid_t pid = fork();
+
+    if (pid == 0)
+    {
+        printf("Child process executing ls command\n");
+        execlp("ls", "ls", NULL);
+        perror("Exec failed");
+        exit(1);
+    }
+    else
+    {
+        wait(NULL);
+        printf("Parent process: Child execution completed\n");
+    }
+
+    return 0;
 }
 
 
 
 ##OUTPUT
 
-![WhatsApp Image 2026-03-20 at 10 07 53 AM](https://github.com/user-attachments/assets/5295f42d-66af-45bc-83c5-a14343019334)
 
+![WhatsApp Image 2026-03-23 at 10 06 34 AM](https://github.com/user-attachments/assets/9d32b8ae-c148-4113-a372-e06d78860f0b)
 
 
 # RESULT:
